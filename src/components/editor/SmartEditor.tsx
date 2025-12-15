@@ -72,7 +72,7 @@ const SmartEditor = ({ value, onChange }: SmartEditorProps) => {
       TaskItem,
       SlashCommands,
       Placeholder.configure({
-        placeholder: "Write something beautiful",
+        placeholder: "Write something beautiful...",
         showOnlyWhenEditable: true,
       }),
     ],
@@ -97,6 +97,7 @@ const SmartEditor = ({ value, onChange }: SmartEditorProps) => {
         <div className='w-full max-w-3xl px-6 py-12'>
           <EditorContent
             editor={editor}
+            id="editor-content"
             className='
               min-h-[40vh]
               w-full

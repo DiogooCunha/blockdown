@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
-import { ChevronDown, ChevronRight, FileText, Trash2, Plus } from "lucide-react";
+import { ChevronDown, ChevronRight, FileText, Trash2, Plus, Download } from "lucide-react";
+import { Button } from "../ui/button";
 
 type FixedSection = "pages";
 type Section = FixedSection | string;
@@ -21,6 +22,7 @@ interface SidebarProps {
   onDeleteCategory: (section: string) => void;
   onMoveNote: (id: string, section: Section) => void;
   onDeleteNote: (id: string) => void;
+  onDownloadCurrentNote: () => void;
 }
 
 const SidebarSection = ({
@@ -148,6 +150,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   onDeleteCategory,
   onMoveNote,
   onDeleteNote,
+  onDownloadCurrentNote,
 }) => {
   const [expandedSections, setExpandedSections] = useState<Record<Section, boolean>>({
     pages: true,
@@ -253,6 +256,12 @@ const Sidebar: React.FC<SidebarProps> = ({
           )}
         </div>
       )}
+      <div className="p-2 border-t border-gray-200">
+        <Button variant="outline" className="w-full" onClick={onDownloadCurrentNote}>
+          <Download className="w-4 h-4" />
+          Download PDF
+        </Button>
+      </div>
     </div>
   );
 };

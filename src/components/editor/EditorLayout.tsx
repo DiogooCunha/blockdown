@@ -111,6 +111,39 @@ const EditorLayout = () => {
       return next;
     });
   };
+  const handleDownloadCurrentNote = async () => {
+    const el = document.getElementById("editor-content");
+    if (!el) return;
+    const { toPng } = await import("html-to-image");
+    const { jsPDF } = await import("jspdf");
+    const dataUrl = await toPng(el as HTMLElement, {
+      cacheBust: true,
+      pixelRatio: 2,
+      style: { backgroundColor: "#ffffff", color: "#111111" },
+    });
+    const pdf = new jsPDF("p", "pt", "a4");
+    const margin = 24;
+    const fullWidth = pdf.internal.pageSize.getWidth();
+    const fullHeight = pdf.internal.pageSize.getHeight();
+    const pageWidth = fullWidth - margin * 2;
+    const pageHeight = fullHeight - margin * 2;
+    const img = new Image();
+    img.src = dataUrl;
+    await new Promise((res) => (img.onload = () => res(null)));
+    const imgWidth = pageWidth;
+    const imgHeight = (img.naturalHeight * imgWidth) / img.naturalWidth;
+    let yOffset = 0;
+    while (yOffset < imgHeight) {
+      pdf.addImage(dataUrl, "PNG", margin, margin - yOffset, imgWidth, imgHeight);
+      yOffset += pageHeight;
+      if (yOffset < imgHeight) {
+        pdf.addPage();
+      }
+    }
+    const safeTitle =
+      (currentNote?.title || "note").replace(/[\\/:*?"<>|]+/g, "").trim() || "note";
+    pdf.save(`${safeTitle}.pdf`);
+  };
 
   useEffect(() => {
     try {
@@ -148,6 +181,7 @@ const EditorLayout = () => {
           onDeleteCategory={handleDeleteCategory}
           onMoveNote={handleMoveNote}
           onDeleteNote={handleDeleteNote}
+          onDownloadCurrentNote={handleDownloadCurrentNote}
         />
         <main className='flex-1 overflow-hidden'>
           <SmartEditor value={value} onChange={handleChange} />

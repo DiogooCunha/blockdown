@@ -9,7 +9,7 @@ interface NavbarProps {
 const Navbar = ({ value, title, onTitleChange }: NavbarProps) => {
   return (
     <header className='w-full border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-10'>
-      <div className='max-w-3xl mx-auto px-6 py-4 flex items-center justify-between'>
+      <div className='max-w-3xl mx-auto px-6 py-4 flex justify-between'>
         <input
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
