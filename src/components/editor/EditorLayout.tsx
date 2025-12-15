@@ -11,7 +11,7 @@ const EditorLayout = () => {
     id: string;
     title: string;
     content?: string;
-    section?: "favorites" | "private" | "shared" | "pages";
+    section?: "favorites" | "private" | "shared" | "pages" | string;
   };
 
   const [notes, setNotes] = useState<Note[]>(() => [
@@ -24,6 +24,7 @@ const EditorLayout = () => {
   ]);
 
   const [currentNoteId, setCurrentNoteId] = useState<string>(notes[0]?.id ?? "");
+  const [categories, setCategories] = useState<string[]>([]);
   const currentNote = useMemo(
     () => notes.find((n) => n.id === currentNoteId),
     [notes, currentNoteId]
@@ -57,6 +58,20 @@ const EditorLayout = () => {
     setNotes((prev) => [newNote, ...prev]);
     setCurrentNoteId(newNote.id);
   };
+  const handleAddCategory = () => {
+    const name = window.prompt("Category name")?.trim();
+    if (!name) return;
+    setCategories((prev) => (prev.includes(name) ? prev : [name, ...prev]));
+  };
+  const handleDeleteCategory = (name: string) => {
+    setCategories((prev) => prev.filter((c) => c !== name));
+    setNotes((prev) =>
+      prev.map((n) => (n.section === name ? { ...n, section: "pages" } : n))
+    );
+  };
+  const handleMoveNote = (id: string, section: Note["section"]) => {
+    setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, section } : n)));
+  };
 
   return (
     <div className='h-screen flex flex-col bg-background mr-20'>
@@ -73,6 +88,10 @@ const EditorLayout = () => {
           currentNoteId={currentNoteId}
           onSelectNote={handleSelectNote}
           onAddNote={handleAddNote}
+          categories={categories}
+          onAddCategory={handleAddCategory}
+          onDeleteCategory={handleDeleteCategory}
+          onMoveNote={handleMoveNote}
         />
         <main className='flex-1 overflow-hidden'>
           <SmartEditor value={value} onChange={handleChange} />

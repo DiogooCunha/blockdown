@@ -120,4 +120,27 @@
   body {
     @apply bg-background text-foreground;
   }
+  .ProseMirror {
+    @apply text-foreground text-lg leading-relaxed font-serif;
+  }
+  .ProseMirror:focus {
+    outline: none;
+    box-shadow: none;
+  }
+  .ProseMirror h1 {
+    @apply text-3xl font-serif leading-relaxed;
+  }
+  .ProseMirror h2 {
+    @apply text-2xl font-serif leading-relaxed;
+  }
+  .ProseMirror blockquote {
+    @apply border-l-2 pl-3 italic;
+  }
+  .ProseMirror .task-list {
+    @apply space-y-2;
+  }
+  .ProseMirror p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    @apply text-muted-foreground italic;
+  }
 }
