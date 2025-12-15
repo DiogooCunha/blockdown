@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { ChevronDown, ChevronRight, Settings, FileText, Trash2, Plus } from "lucide-react";
+import { ChevronDown, ChevronRight, FileText, Trash2, Plus } from "lucide-react";
 
 type FixedSection = "pages";
 type Section = FixedSection | string;
