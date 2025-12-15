@@ -20,10 +20,9 @@ export function useAutosave({
   // Load from localStorage
   useEffect(() => {
     const saved = localStorage.getItem(storageKey);
-    if (saved !== null) {
-      setValue(saved);
-    }
-  }, [storageKey]);
+    setValue(saved !== null ? saved : content);
+    setIsSaving(false);
+  }, [storageKey, content]);
 
   // Save with debounce
   useEffect(() => {

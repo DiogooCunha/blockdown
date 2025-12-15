@@ -3,21 +3,15 @@ type CommandResult = {
   cursor: number;
 };
 
-const INLINE_COMMANDS: Record<
-  string,
-  (content: string) => { text: string; cursorOffset: number }
-> = {
+const INLINE_COMMANDS: Record<string, (content: string) => { text: string }> = {
   "/h1": (content) => ({
     text: `# ${content}`,
-    cursorOffset: `# ${content}`.length + 1,
   }),
   "/h2": (content) => ({
     text: `## ${content}`,
-    cursorOffset: `## ${content}`.length + 1,
   }),
   "/quote": (content) => ({
     text: `> ${content}`,
-    cursorOffset: `> ${content}`.length + 1,
   }),
 };
 
@@ -38,7 +32,7 @@ export function applySlashCommand(
   const handler = INLINE_COMMANDS[command];
   if (!handler) return null;
 
-  const { text, cursorOffset } = handler(content);
+  const { text } = handler(content);
 
   // substitui linha inteira
   lines[lines.length - 1] = text;
