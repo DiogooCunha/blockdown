@@ -3,7 +3,7 @@ import SmartEditor from "./SmartEditor";
 import Footer from "../shared/Footer";
 import { useAutosave } from "@/hooks/useAutosave";
 import Sidebar from "../shared/Sidebar";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { nanoid } from "nanoid";
 
 const EditorLayout = () => {
@@ -11,20 +11,42 @@ const EditorLayout = () => {
     id: string;
     title: string;
     content?: string;
-    section?: "favorites" | "private" | "shared" | "pages" | string;
+    section?: "pages" | string;
   };
 
-  const [notes, setNotes] = useState<Note[]>(() => [
-    { id: nanoid(), title: "Quick Notes", content: "", section: "favorites" },
-    { id: nanoid(), title: "Meeting Notes", content: "", section: "favorites" },
-    { id: nanoid(), title: "Inbox", content: "", section: "private" },
-    { id: nanoid(), title: "Documents", content: "", section: "private" },
-    { id: nanoid(), title: "Team Workspace", content: "", section: "shared" },
-    { id: nanoid(), title: "All Pages", content: "", section: "pages" },
-  ]);
+  const NOTES_KEY = "markdown-editor:notes";
+  const CATEGORIES_KEY = "markdown-editor:categories";
+  const CURRENT_NOTE_KEY = "markdown-editor:current-note-id";
 
-  const [currentNoteId, setCurrentNoteId] = useState<string>(notes[0]?.id ?? "");
-  const [categories, setCategories] = useState<string[]>([]);
+  const defaultNotes: Note[] = [{ id: nanoid(), title: "Untitled", content: "", section: "pages" }];
+  const removedFixed = new Set(["favorites", "private", "shared"]);
+
+  const [notes, setNotes] = useState<Note[]>(() => {
+    try {
+      const raw = localStorage.getItem(NOTES_KEY);
+      if (raw) {
+        const loaded = JSON.parse(raw) as Note[];
+        return loaded.map((n: Note) =>
+          n.section && removedFixed.has(n.section) ? { ...n, section: "pages" } : n
+        );
+      }
+    } catch {}
+    return defaultNotes;
+  });
+  const [categories, setCategories] = useState<string[]>(() => {
+    try {
+      const raw = localStorage.getItem(CATEGORIES_KEY);
+      if (raw) return JSON.parse(raw) as string[];
+    } catch {}
+    return [];
+  });
+  const [currentNoteId, setCurrentNoteId] = useState<string>(() => {
+    try {
+      const raw = localStorage.getItem(CURRENT_NOTE_KEY);
+      if (raw) return raw;
+    } catch {}
+    return notes[0]?.id ?? "";
+  });
   const currentNote = useMemo(
     () => notes.find((n) => n.id === currentNoteId),
     [notes, currentNoteId]
@@ -72,6 +94,39 @@ const EditorLayout = () => {
   const handleMoveNote = (id: string, section: Note["section"]) => {
     setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, section } : n)));
   };
+  const handleDeleteNote = (id: string) => {
+    setNotes((prev) => {
+      const next = prev.filter((n) => n.id !== id);
+      try {
+        localStorage.removeItem(`${id}:smart-editor:content`);
+      } catch {}
+      if (next.length === 0) {
+        const newNote: Note = { id: nanoid(), title: "Untitled", content: "", section: "pages" };
+        setCurrentNoteId(newNote.id);
+        return [newNote];
+      }
+      if (currentNoteId === id) {
+        setCurrentNoteId(next[0].id);
+      }
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+    } catch {}
+  }, [notes]);
+  useEffect(() => {
+    try {
+      localStorage.setItem(CATEGORIES_KEY, JSON.stringify(categories));
+    } catch {}
+  }, [categories]);
+  useEffect(() => {
+    try {
+      localStorage.setItem(CURRENT_NOTE_KEY, currentNoteId);
+    } catch {}
+  }, [currentNoteId]);
 
   return (
     <div className='h-screen flex flex-col bg-background mr-20'>
@@ -92,6 +147,7 @@ const EditorLayout = () => {
           onAddCategory={handleAddCategory}
           onDeleteCategory={handleDeleteCategory}
           onMoveNote={handleMoveNote}
+          onDeleteNote={handleDeleteNote}
         />
         <main className='flex-1 overflow-hidden'>
           <SmartEditor value={value} onChange={handleChange} />
