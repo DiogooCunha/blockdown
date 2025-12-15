@@ -1,4 +1,6 @@
+import React, { useRef } from "react";
 import { Textarea } from "../ui/textarea";
+import { applySlashCommand } from "@/lib/commands";
 
 interface SmartEditorProps {
   value: string;
@@ -6,15 +8,35 @@ interface SmartEditorProps {
 }
 
 const SmartEditor = ({ value, onChange }: SmartEditorProps) => {
-  console.log(value);
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key !== "Enter") return;
+
+    const el = ref.current;
+    if (!el) return;
+
+    const result = applySlashCommand(value, el.selectionStart);
+    if (!result) return;
+
+    e.preventDefault();
+    onChange(result.value);
+
+    requestAnimationFrame(() => {
+      el.selectionStart = el.selectionEnd = result.cursor;
+    });
+  };
+
   return (
     <div className='w-full flex flex-col bg-background'>
       {/* Editor Area */}
       <main className='flex-1 w-full flex justify-center'>
         <div className='w-full max-w-3xl px-6 py-12'>
           <Textarea
+            ref={ref}
             value={value}
             onChange={(e) => onChange(e.target.value)}
+            onKeyDown={onKeyDown}
             placeholder='Start writing something beautiful...'
             className='
               min-h-[40vh]

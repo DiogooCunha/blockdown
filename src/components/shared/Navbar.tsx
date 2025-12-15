@@ -9,7 +9,7 @@ const Navbar = ({ value }: NavbarProps) => {
     <header className='w-full border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-10'>
       <div className='max-w-3xl mx-auto px-6 py-4 flex items-center justify-between'>
         <h1 className='font-serif text-xl font-medium text-foreground tracking-tight'>
-          Smart Editor
+          Block Down
         </h1>
         <div className='flex items-center gap-4 text-sm text-muted-foreground font-mono'>
           <span>{countWords(value)} words</span>
